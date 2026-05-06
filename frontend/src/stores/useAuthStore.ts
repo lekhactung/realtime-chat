@@ -32,7 +32,8 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         try {
             set({ loading: true })
             const { accessToken } = await authService.signIn(username, password)
-            set({ accessToken })
+            get().setAccessToken(accessToken)
+
 
             await get().fetchMe()
 
@@ -74,11 +75,11 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     refresh: async () => {
         try {
             set({ loading: true })
-            const { user } = get()
+            const { user, fetchMe, setAccessToken } = get()
             const accessToken = await authService.refresh()
-            set({ accessToken })
+            setAccessToken(accessToken)
             if (!user) {
-                await get().fetchMe()
+                await fetchMe()
             }
         } catch (error) {
             console.error(error)
@@ -87,5 +88,9 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         } finally {
             set({ loading: false })
         }
+    },
+
+    setAccessToken: (accessToken) => {
+        set({ accessToken })
     }
 }))
